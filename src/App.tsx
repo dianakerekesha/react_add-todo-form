@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import './App.scss';
+import todosFromServer from './api/todos';
+import usersFromServer from './api/users';
 import { getUserById } from './services/userService';
 import { TodoList } from './components/TodoList';
 import { TodoForm } from './components/TodoForm';
-import todosFromServer from './api/todos';
 import { TodoWithUser } from './types/todo';
 
 const initialTodos: TodoWithUser[] = todosFromServer.map(todo => ({
@@ -14,13 +15,15 @@ const initialTodos: TodoWithUser[] = todosFromServer.map(todo => ({
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<TodoWithUser[]>(initialTodos);
 
-  const addTodo = (newTodo: TodoWithUser) => {
+  const addTodo = (title: string, userId: number) => {
     const maxId =
       todos.length > 0 ? Math.max(...todos.map(todo => todo.id)) : 0;
     const todoToSave: TodoWithUser = {
-      ...newTodo,
       id: maxId + 1,
+      title,
+      userId,
       completed: false,
+      user: getUserById(userId),
     };
 
     setTodos(currentTodo => [...currentTodo, todoToSave]);
@@ -30,7 +33,7 @@ export const App: React.FC = () => {
     <div className="App">
       <h1>Add todo form</h1>
 
-      <TodoForm onSubmit={addTodo} />
+      <TodoForm users={usersFromServer} onSubmit={addTodo} />
 
       <TodoList todos={todos} />
     </div>
